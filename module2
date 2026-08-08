@@ -1,0 +1,52 @@
+# Day 2 - Timing Libs, Hierarchical vs Flat Synthesis and Efficient FLOP Coding
+
+Day 2 focuses on understanding Liberty files (`.lib`), analyzing timing/power/area specifications, performing Hierarchical vs. Flat Synthesis using Yosys, and writing efficient Flip-Flop code with asynchronous and synchronous resets.
+
+---
+
+## Table of Contents
+1. [Introduction to Liberty Files (.lib)](#1-introduction-to-liberty-files-lib)
+2. [Hierarchical vs Flat Synthesis](#2-hierarchical-vs-flat-synthesis)
+3. [Flop Coding Styles & Reset Strategies](#3-flop-coding-styles--reset-strategies)
+4. [Labs & Synthesis Walkthrough](#4-labs--synthesis-walkthrough)
+
+---
+
+## 1. Introduction to Liberty Files (.lib)
+
+The Liberty file (e.g., `sky130_fd_sc_hd__tt_025C_1v80.lib`) defines the characteristics of standard library cells under specific PVT conditions:
+- **P (Process):** Typical (`tt`) / Slow (`ss`) / Fast (`ff`) corner.
+- **V (Voltage):** Operating supply voltage (e.g., `1.80V`).
+- **T (Temperature):** Temperature conditions (e.g., `25°C`).
+
+### Why do we need different cell variations?
+- **Fast Cells:** Used on critical paths to meet timing setup requirements.
+- **Slow Cells:** Used to prevent hold-time violations.
+
+---
+
+## 2. Hierarchical vs Flat Synthesis
+
+### Hierarchical Synthesis
+Synthesizes sub-modules individually while preserving design hierarchy.
+- **Advantages:** Clean organization, modular design, easy debugging.
+
+### Flat Synthesis
+Flattens the design into a single netlist without module boundaries (`flatten` command in Yosys).
+- **Advantages:** Allows cross-boundary logic optimization, reducing gate count and improving timing.
+
+---
+
+## 3. Flop Coding Styles & Reset Strategies
+
+Flip-Flops are critical sequential elements used to store state and eliminate combinational glitches.
+
+### Asynchronous Reset
+The reset signal immediately overrides the clock signal to reset the registers.
+```verilog
+always @(posedge clk or posedge async_reset) begin
+    if (async_reset)
+        q <= 1'b0;
+    else
+        q <= d;
+end
